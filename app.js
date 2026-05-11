@@ -4,13 +4,12 @@ const generateStatus = document.querySelector('#generate-status');
 const downloadLink = document.querySelector('#download-link');
 const dropZone = document.querySelector('#drop-zone');
 const fileInput = document.querySelector('#file-input');
-const previewImage = document.querySelector('#preview-image');
+const previewCanvas = document.querySelector('#preview-canvas');
 const decodeStatus = document.querySelector('#decode-status');
 const decodedText = document.querySelector('#decoded-text');
 const copyButton = document.querySelector('#copy-button');
 
 const qrContext = qrCanvas.getContext('2d');
-let currentPreviewUrl;
 let fallbackImageUrl;
 
 function setStatus(element, message, kind = '') {
@@ -98,14 +97,19 @@ function resetDecodeState(message = 'No image selected.') {
   setStatus(decodeStatus, message);
 }
 
-function showPreview(file) {
-  if (currentPreviewUrl) {
-    URL.revokeObjectURL(currentPreviewUrl);
-  }
+function showPreview(image) {
+  const context = previewCanvas.getContext('2d');
+  const scale = Math.min(previewCanvas.width / image.width, previewCanvas.height / image.height, 1);
+  const width = Math.max(1, Math.floor(image.width * scale));
+  const height = Math.max(1, Math.floor(image.height * scale));
+  const x = Math.floor((previewCanvas.width - width) / 2);
+  const y = Math.floor((previewCanvas.height - height) / 2);
 
-  currentPreviewUrl = URL.createObjectURL(file);
-  previewImage.src = currentPreviewUrl;
-  previewImage.hidden = false;
+  context.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+  context.drawImage(image, x, y, width, height);
+  previewCanvas.hidden = false;
 }
 
 async function loadImage(file) {
@@ -144,11 +148,11 @@ async function decodeFile(file) {
     return;
   }
 
-  showPreview(file);
   resetDecodeState('Scanning image...');
 
   try {
     const image = await loadImage(file);
+    showPreview(image);
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d', { willReadFrequently: true });
     canvas.width = image.width;
@@ -216,10 +220,6 @@ copyButton.addEventListener('click', async () => {
 });
 
 window.addEventListener('beforeunload', () => {
-  if (currentPreviewUrl) {
-    URL.revokeObjectURL(currentPreviewUrl);
-  }
-
   if (fallbackImageUrl) {
     URL.revokeObjectURL(fallbackImageUrl);
   }

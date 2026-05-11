@@ -240,11 +240,11 @@ textarea:focus,
   gap: 12px;
 }
 
-#preview-image {
-  max-width: min(100%, 320px);
-  max-height: 240px;
+#preview-canvas {
+  width: min(100%, 320px);
+  height: auto;
   border-radius: 18px;
-  object-fit: contain;
+  background: #fff;
   box-shadow: 0 14px 40px rgba(21, 32, 51, 0.12);
 }
 

@@ -62,7 +62,7 @@
           <input id="file-input" type="file" accept="image/*" hidden />
 
           <div class="decode-preview" aria-live="polite">
-            <img id="preview-image" alt="Selected QR code preview" hidden />
+            <canvas id="preview-canvas" width="320" height="240" aria-label="Selected QR code preview" hidden></canvas>
             <p id="decode-status" class="status">No image selected.</p>
           </div>
 
