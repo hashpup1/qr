@@ -1,6 +1,6 @@
 # QR
 
-A single-page GitHub Pages app for QR codes.
+A single-page GitHub Pages app for generating and decoding QR codes.
 
 ## Features
 

@@ -91,11 +91,11 @@ function generateQrCode() {
   }
 }
 
-function resetDecodeState(message = 'No image selected.', kind = '') {
+function resetDecodeState(message = 'No image selected.', statusType = '') {
   decodedText.value = '';
   copyButton.disabled = true;
   previewCanvas.hidden = true;
-  setStatus(decodeStatus, message, kind);
+  setStatus(decodeStatus, message, statusType);
 }
 
 function showPreview(image) {
