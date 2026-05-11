@@ -91,10 +91,11 @@ function generateQrCode() {
   }
 }
 
-function resetDecodeState(message = 'No image selected.') {
+function resetDecodeState(message = 'No image selected.', kind = '') {
   decodedText.value = '';
   copyButton.disabled = true;
-  setStatus(decodeStatus, message);
+  previewCanvas.hidden = true;
+  setStatus(decodeStatus, message, kind);
 }
 
 function showPreview(image) {
@@ -137,14 +138,12 @@ async function decodeFile(file) {
   }
 
   if (!file.type.startsWith('image/')) {
-    resetDecodeState('Please select an image file.');
-    setStatus(decodeStatus, 'Please select an image file.', 'error');
+    resetDecodeState('Please select an image file.', 'error');
     return;
   }
 
   if (typeof window.jsQR !== 'function') {
-    resetDecodeState('QR decoder failed to load. Refresh the page and try again.');
-    setStatus(decodeStatus, 'QR decoder failed to load. Refresh the page and try again.', 'error');
+    resetDecodeState('QR decoder failed to load. Refresh the page and try again.', 'error');
     return;
   }
 
@@ -165,8 +164,7 @@ async function decodeFile(file) {
     });
 
     if (!result) {
-      resetDecodeState('No QR code was found in this image.');
-      setStatus(decodeStatus, 'No QR code was found in this image.', 'error');
+      resetDecodeState('No QR code was found in this image.', 'error');
       return;
     }
 
@@ -174,8 +172,7 @@ async function decodeFile(file) {
     copyButton.disabled = !result.data;
     setStatus(decodeStatus, 'QR code decoded successfully.', 'success');
   } catch (error) {
-    resetDecodeState(error.message || 'Unable to decode this image.');
-    setStatus(decodeStatus, error.message || 'Unable to decode this image.', 'error');
+    resetDecodeState(error.message || 'Unable to decode this image.', 'error');
   }
 }
 
