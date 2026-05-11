@@ -11,10 +11,21 @@ const copyButton = document.querySelector('#copy-button');
 
 const qrContext = qrCanvas.getContext('2d');
 let currentPreviewUrl;
+let fallbackImageUrl;
 
 function setStatus(element, message, kind = '') {
   element.textContent = message;
   element.className = `status${kind ? ` ${kind}` : ''}`;
+}
+
+function setDownloadEnabled(enabled) {
+  if (enabled) {
+    downloadLink.removeAttribute('aria-disabled');
+    return;
+  }
+
+  downloadLink.removeAttribute('href');
+  downloadLink.setAttribute('aria-disabled', 'true');
 }
 
 function drawPlaceholder() {
@@ -25,13 +36,32 @@ function drawPlaceholder() {
   qrContext.textAlign = 'center';
   qrContext.textBaseline = 'middle';
   qrContext.fillText('Type text to generate', qrCanvas.width / 2, qrCanvas.height / 2);
-  downloadLink.removeAttribute('href');
-  downloadLink.setAttribute('aria-disabled', 'true');
+  setDownloadEnabled(false);
 }
 
 function updateDownloadLink() {
   downloadLink.href = qrCanvas.toDataURL('image/png');
-  downloadLink.removeAttribute('aria-disabled');
+  setDownloadEnabled(true);
+}
+
+function drawQrToCanvas(qr) {
+  const moduleCount = qr.getModuleCount();
+  const margin = 4;
+  const cellSize = Math.floor(qrCanvas.width / (moduleCount + margin * 2));
+  const qrSize = cellSize * moduleCount;
+  const offset = Math.floor((qrCanvas.width - qrSize) / 2);
+
+  qrContext.fillStyle = '#ffffff';
+  qrContext.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+  qrContext.fillStyle = '#152033';
+
+  for (let row = 0; row < moduleCount; row += 1) {
+    for (let col = 0; col < moduleCount; col += 1) {
+      if (qr.isDark(row, col)) {
+        qrContext.fillRect(offset + col * cellSize, offset + row * cellSize, cellSize, cellSize);
+      }
+    }
+  }
 }
 
 function generateQrCode() {
@@ -43,36 +73,23 @@ function generateQrCode() {
     return;
   }
 
-  if (!window.QRCode?.toCanvas) {
+  if (typeof window.qrcode !== 'function') {
     drawPlaceholder();
-    setStatus(generateStatus, 'QR generator failed to load. Check your connection and refresh.', 'error');
+    setStatus(generateStatus, 'QR generator failed to load. Refresh the page and try again.', 'error');
     return;
   }
 
-  window.QRCode.toCanvas(
-    qrCanvas,
-    value,
-    {
-      width: 320,
-      margin: 2,
-      color: {
-        dark: '#152033',
-        light: '#ffffff',
-      },
-      errorCorrectionLevel: 'M',
-    },
-    (error) => {
-      if (error) {
-        setStatus(generateStatus, 'This text is too long to encode as a QR code.', 'error');
-        downloadLink.removeAttribute('href');
-        downloadLink.setAttribute('aria-disabled', 'true');
-        return;
-      }
-
-      updateDownloadLink();
-      setStatus(generateStatus, 'QR code updated in real time.', 'success');
-    },
-  );
+  try {
+    const qr = window.qrcode(0, 'M');
+    qr.addData(value, 'Byte');
+    qr.make();
+    drawQrToCanvas(qr);
+    updateDownloadLink();
+    setStatus(generateStatus, 'QR code updated in real time.', 'success');
+  } catch {
+    setDownloadEnabled(false);
+    setStatus(generateStatus, 'This text is too long to encode as a QR code.', 'error');
+  }
 }
 
 function resetDecodeState(message = 'No image selected.') {
@@ -96,11 +113,17 @@ async function loadImage(file) {
     return createImageBitmap(file);
   }
 
+  if (fallbackImageUrl) {
+    URL.revokeObjectURL(fallbackImageUrl);
+  }
+
+  fallbackImageUrl = URL.createObjectURL(file);
+
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error('The selected file could not be read as an image.'));
-    image.src = URL.createObjectURL(file);
+    image.src = fallbackImageUrl;
   });
 }
 
@@ -115,9 +138,9 @@ async function decodeFile(file) {
     return;
   }
 
-  if (!window.jsQR) {
-    resetDecodeState('QR decoder failed to load. Check your connection and refresh.');
-    setStatus(decodeStatus, 'QR decoder failed to load. Check your connection and refresh.', 'error');
+  if (typeof window.jsQR !== 'function') {
+    resetDecodeState('QR decoder failed to load. Refresh the page and try again.');
+    setStatus(decodeStatus, 'QR decoder failed to load. Refresh the page and try again.', 'error');
     return;
   }
 
@@ -195,5 +218,9 @@ copyButton.addEventListener('click', async () => {
 window.addEventListener('beforeunload', () => {
   if (currentPreviewUrl) {
     URL.revokeObjectURL(currentPreviewUrl);
+  }
+
+  if (fallbackImageUrl) {
+    URL.revokeObjectURL(fallbackImageUrl);
   }
 });

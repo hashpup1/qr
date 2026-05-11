@@ -7,7 +7,7 @@ A single-page GitHub Pages app for QR codes.
 - Generate a QR code from text or a URL as you type.
 - Download the generated QR code as a PNG.
 - Decode a QR code from a local image by dragging and dropping it onto the upload zone or by clicking the zone to choose a file.
-- Runs entirely client-side in the browser.
+- Runs entirely client-side in the browser with vendored JavaScript libraries.
 - Responsive layout optimized for desktop and usable on mobile.
 
 ## Run locally
@@ -23,3 +23,8 @@ Then visit `http://localhost:8000`.
 ## GitHub Pages
 
 Enable GitHub Pages for the repository and publish from the `main` branch root. The site will serve `index.html` as the app entry point.
+
+## Third-party libraries
+
+- `vendor/qrcode-generator/qrcode.js`: qrcode-generator 1.4.4, MIT license.
+- `vendor/jsqr/jsQR.js`: jsQR 1.4.0, Apache-2.0 license.
