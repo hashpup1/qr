@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Generate QR codes from text and decode QR code images entirely in your browser."
+    />
+    <title>QR Code Generator and Decoder</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Client-side QR tools</p>
+          <h1 id="page-title">Generate and decode QR codes in one page.</h1>
+          <p class="intro">
+            Type text to create a QR code in real time, or drop an image to read the
+            text stored in a QR code. Everything happens locally in your browser.
+          </p>
+        </div>
+      </section>
+
+      <section class="tool-grid" aria-label="QR code tools">
+        <article class="card generator" aria-labelledby="generator-title">
+          <div class="card-header">
+            <p class="step">Generate</p>
+            <h2 id="generator-title">Text to QR code</h2>
+          </div>
+
+          <label for="qr-text">Text or URL</label>
+          <textarea
+            id="qr-text"
+            rows="8"
+            spellcheck="false"
+            placeholder="Start typing to generate a QR code..."
+          >https://hashpup1.github.io/qr/</textarea>
+
+          <div class="qr-output" aria-live="polite">
+            <canvas id="qr-canvas" width="320" height="320" aria-label="Generated QR code"></canvas>
+            <p id="generate-status" class="status">Ready.</p>
+            <a id="download-link" class="button" download="qr-code.png" href="#">Download PNG</a>
+          </div>
+        </article>
+
+        <article class="card decoder" aria-labelledby="decoder-title">
+          <div class="card-header">
+            <p class="step">Decode</p>
+            <h2 id="decoder-title">QR image to text</h2>
+          </div>
+
+          <button id="drop-zone" class="drop-zone" type="button" aria-describedby="upload-help decode-status">
+            <span class="upload-icon" aria-hidden="true">⌁</span>
+            <strong>Drop a QR image here</strong>
+            <span id="upload-help">or click to select a PNG, JPG, GIF, or WebP file</span>
+          </button>
+          <input id="file-input" type="file" accept="image/*" hidden />
+
+          <div class="decode-preview" aria-live="polite">
+            <img id="preview-image" alt="Selected QR code preview" hidden />
+            <p id="decode-status" class="status">No image selected.</p>
+          </div>
+
+          <label for="decoded-text">Decoded text</label>
+          <textarea id="decoded-text" rows="8" readonly placeholder="Decoded QR text appears here..."></textarea>
+          <button id="copy-button" class="button secondary" type="button" disabled>Copy decoded text</button>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
